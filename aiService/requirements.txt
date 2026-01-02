@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pandas
+numpy
+scikit-learn
+chromadb
+langchain-groq
+langgraph
+python-dotenv
+pydantic

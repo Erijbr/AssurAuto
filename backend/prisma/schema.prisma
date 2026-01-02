@@ -1,0 +1,54 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String   
+  full_name  String
+  role       String   @default("CLIENT") // "CLIENT" ou "AGENT"
+  
+  claims     Claim[]
+  
+  created_at DateTime @default(now())
+}
+
+model Claim {
+  id            String   @id @default(uuid())
+  
+  // Relation avec l'utilisateur
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  
+  // --- CHAMPS STANDARDS ---
+  policy_number String
+  description   String
+  claim_amount  Float
+  incident_date DateTime
+  document_path String?   // Le nom du fichier uploadé (ex: "photo_accident.jpg")
+  status        String    @default("ANALYZING") // ANALYZING, VALIDATED, REJECTED, IN_PROGRESS
+  
+  // --- NOUVEAUX CHAMPS (Correspondance exacte avec React) ---
+  // Ils sont marqués optionnels (?) pour éviter les erreurs si l'OCR échoue
+  incident_type         String?  // Ex: "Single Vehicle Collision"
+  collision_type        String?  // Ex: "Front Collision"
+  incident_severity     String?  // Ex: "Minor Damage"
+  authorities_contacted String?  // Ex: "Police"
+  city                  String?  // Ex: "Paris"
+
+  // --- CHAMPS ANALYSE IA ---
+  ai_score      Float?   @default(0)  // Score de confiance (0 à 100)
+  ai_analysis   String?  // Explication textuelle ("Le montant semble élevé pour...")
+
+  // --- METADATA ---
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
